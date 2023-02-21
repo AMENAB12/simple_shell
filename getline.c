@@ -13,7 +13,8 @@ int _getline(data_of_program *data)
 	static char array_operators[10] = {'\0'};
 	ssize_t bytes_read, i = 0;
 
-
+	/* check if doesnot exist more commands in the array */
+	/* and checks the logical operators */
 	if (!array_commands[0] || (array_operators[0] == '&' && errno != 0) ||
 		(array_operators[0] == '|' && errno == 0))
 	{
@@ -52,23 +53,23 @@ int _getline(data_of_program *data)
 
 /**
 * check_logic_ops - checks and split for && and || operators
-* * @array_commands: array of the commands.
-* @i: index in the array_commands checked
-* @array_operators: logical operators
+* @array_commands: array of the commands.
+* @i: index in the array_commands to be checked
+* @array_operators: array of the logical operators for each previous command
 *
-* Return: last command in the array_commands.
+* Return: index of the last command in the array_commands.
 */
 int check_logic_ops(char *array_commands[], int i, char array_operators[])
 {
 	char *temp = NULL;
 	int j;
 
-	
+	/* checks for the & char in the command line*/
 	for (j = 0; array_commands[i] != NULL  && array_commands[i][j]; j++)
 	{
 		if (array_commands[i][j] == '&' && array_commands[i][j + 1] == '&')
 		{
-			
+			/* split the line when chars && was found */
 			temp = array_commands[i];
 			array_commands[i][j] = '\0';
 			array_commands[i] = str_duplicate(array_commands[i]);
@@ -80,7 +81,7 @@ int check_logic_ops(char *array_commands[], int i, char array_operators[])
 		}
 		if (array_commands[i][j] == '|' && array_commands[i][j + 1] == '|')
 		{
-			
+			/* split the line when chars || was found */
 			temp = array_commands[i];
 			array_commands[i][j] = '\0';
 			array_commands[i] = str_duplicate(array_commands[i]);
