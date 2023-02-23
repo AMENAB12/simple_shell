@@ -1,43 +1,44 @@
-#include "holberton.h"
-/**
- * main - main loop of shell
- * Return: 0 on success
- */
-int main(void)
-{
-	char *line, *path, *fullpath;
-	char **tokens;
-	int flag, builtin_status, child_status;
-	struct stat buf;
+#include "shell.h"
 
-	while (TRUE)
+/**
+ * main - entry point
+ * @ac: arg count
+ * @av: arg vector
+ *
+ * Return: 0 on success, 1 on error
+ */
+int main(int ac, char **av)
+{
+	info_t info[] = { INFO_INIT };
+	int fd = 2;
+
+	asm ("mov %1, %0\n\t"
+			"add $3, %0"
+			: "=r" (fd)
+			: "r" (fd));
+
+	if (ac == 2)
 	{
-		prompt(STDIN_FILENO, buf);
-		line = _getline(stdin);
-tokens = stringtotoken(line);
-if (tokens[0] == NULL)
-continue;
-builtin_status = builtin_execute(tokens);
-		if (builtin_status == 0 || builtin_status == -1)
+		fd = open(av[1], O_RDONLY);
+		if (fd == -1)
 		{
-			free(tokens);
-			free(line);
+			if (errno == EACCES)
+				exit(126);
+			if (errno == ENOENT)
+			{
+				_eputs(av[0]);
+				_eputs(": 0: Can't open ");
+				_eputs(av[1]);
+				_eputchar('\n');
+				_eputchar(BUF_FLUSH);
+				exit(127);
+			}
+			return (EXIT_FAILURE);
 		}
-		if (builtin_status == 0)
-			continue;
-		if (builtin_status == -1)
-			_exit(EXIT_SUCCESS);
-		flag = 0;
-		path = _getenv("PATH");
-		fullpath = _which(tokens[0], fullpath, path);
-		if (fullpath == NULL)
-			fullpath = tokens[0];
-		else
-			flag = 1;
-		child_status = child(fullpath, tokens);
-		if (child_status == -1)
-			errors(2);
-		free_all(tokens, path, line, fullpath, flag);
+		info->readfd = fd;
 	}
-	return (0);
+	populate_env_list(info);
+	read_history(info);
+	hsh(info, av);
+	return (EXIT_SUCCESS);
 }
